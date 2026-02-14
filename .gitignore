@@ -1,5 +1,5 @@
 app/node_modules
-app/.env
+# app/.env
 kastbhanjan-backend/venv
 kastbhanjan-backend/.env
 kastbhanjan-backend/__pycache__ 
