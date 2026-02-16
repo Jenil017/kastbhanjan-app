@@ -53,7 +53,7 @@ export function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@kastbhanjan.com"
+                placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -64,7 +64,7 @@ export function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder=""
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -83,9 +83,6 @@ export function LoginPage() {
               Sign In
             </Button>
           </form>
-          <p className="text-center text-sm text-gray-500 mt-4">
-            Default: admin@kastbhanjan.com / admin123
-          </p>
         </CardContent>
       </Card>
     </div>
