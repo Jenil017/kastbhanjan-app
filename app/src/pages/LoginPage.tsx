@@ -83,6 +83,9 @@ export function LoginPage() {
               Sign In
             </Button>
           </form>
+          <p className="text-center text-sm text-gray-500 mt-4">
+            Default: admin@kastbhanjan.com / admin123
+          </p>
         </CardContent>
       </Card>
     </div>
