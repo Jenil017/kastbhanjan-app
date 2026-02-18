@@ -137,14 +137,6 @@ The API will be available at `http://localhost:8000`
 7. **payments** - Customer payments
 8. **expenses** - Business expenses
 
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://postgres:postgres@localhost:5432/kastbhanjan` |
-| `SECRET_KEY` | JWT secret key | `your-secret-key` |
-| `HOST` | Server host | `0.0.0.0` |
-| `PORT` | Server port | `8000` |
 
 ## License
 
