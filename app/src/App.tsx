@@ -15,6 +15,7 @@ import { ExpenseFormPage } from '@/pages/ExpenseFormPage';
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { Layout } from '@/components/Layout';
 import { Spinner } from '@/components/ui/spinner';
+import { PWABanner } from '@/components/PWABanner';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -68,6 +69,7 @@ function App() {
       <BrowserRouter>
         <AppRoutes />
         <Toaster position="top-right" richColors />
+        <PWABanner />
       </BrowserRouter>
     </AuthProvider>
   );
