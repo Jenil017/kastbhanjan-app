@@ -11,7 +11,7 @@
             "headers": [
                 {
                     "key": "Cache-Control",
-                    "value": "no-cache"
+                    "value": "no-cache, no-store, must-revalidate"
                 },
                 {
                     "key": "Service-Worker-Allowed",
@@ -25,6 +25,19 @@
                 {
                     "key": "Content-Type",
                     "value": "application/manifest+json"
+                },
+                {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                }
+            ]
+        },
+        {
+            "source": "/.well-known/(.*)",
+            "headers": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json"
                 }
             ]
         }
