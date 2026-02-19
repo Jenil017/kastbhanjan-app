@@ -195,53 +195,46 @@ export function BuyerLedgerPage() {
               return;
             }
 
-            const { buyer, entries, closing_balance } = ledger;
+            // Filter entries to current month
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const monthName = now.toLocaleString('en-IN', { month: 'long' });
 
-            // Take recent 15 entries
-            const recentEntries = entries.slice(0, 15);
+            const monthEntries = entries.filter(entry => {
+              const d = new Date(entry.date);
+              return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            });
+
+            // Sort oldest to newest for the message
+            const sortedEntries = [...monthEntries].reverse();
 
             let message = `*KASTBHANJAN PLYWOOD*\n`;
             message += `*Customer:* ${buyer.name}\n`;
-            message += `*Report Date:* ${new Date().toLocaleDateString('en-IN')}\n`;
+            message += `*Report:* ${monthName} ${currentYear}\n`;
             message += `------------------------\n`;
-            message += `*Date | Product | Qty | Amount*\n`;
 
-            recentEntries.forEach(entry => {
-              const date = new Date(entry.date).toLocaleDateString('en-IN');
+            let grandTotal = 0;
+
+            sortedEntries.forEach(entry => {
+              const date = new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit' });
               if (entry.type === 'SALE') {
-                // Try to parse product/qty from description if available, else just desc
-                // Format: "Sale #123 - PAID" -> We can't easily get product/qty here without fetching more data
-                // The current API returns mixed description.
-                // However, the user asked for "product , weight". 
-                // The current `entries` only has `description` string.
-                // To get product/weight, we would need to fetch full sale details or update the API.
-                // For now, I will use the description as best effort or just Amount.
-                // Wait, the user asked specifically: "date , product , weight and totle amont"
-                // This implies I might need to fetch `sales` with items?
-                // The `ledger` endpoint returns `BuyerLedger` which has `entries`.
-                // `entries` are simplified.
-                // Let's look at `get_buyer_ledger` in backend.
-                // It constructs description: `f"Sale #{sale.id} - {sale.payment_type.value}"`.
-                // It DOES NOT include product/weight.
-                // I cannot fulfill "product, weight" requirement with current `entries` data.
-                // I should stick to `description` for now but format it nicely, 
-                // OR I need to update Backend to include details in description?
-                // Updating backend is better.
-                message += `${date} - ${entry.description} - ₹${entry.debit}\n`;
+                message += `${date} | ${entry.description} | ₹${entry.debit}\n`;
+                grandTotal += entry.debit;
               } else {
-                message += `${date} - ${entry.description} - ₹${entry.credit} (Cr)\n`;
+                message += `${date} | Payment (${entry.description.replace('Payment - ', '')}) | -₹${entry.credit}\n`;
+                grandTotal -= entry.credit;
               }
             });
 
-            if (entries.length > 15) {
-              message += `... (+${entries.length - 15} more)\n`;
+            if (sortedEntries.length === 0) {
+              message += `(No transactions this month)\n`;
             }
 
             message += `------------------------\n`;
-            message += `*Total Amount: ₹${closing_balance}*\n`;
+            message += `*Total: ₹${grandTotal.toFixed(0)}*\n`;
 
             const phone = (buyer.phone || '').replace(/\D/g, '');
-            // Simple logic: if 10 digits, add 91. If more, assume full number
             const finalPhone = phone.length === 10 ? `91${phone}` : phone;
 
             const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`;

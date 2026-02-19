@@ -149,9 +149,13 @@ def get_buyer_ledger(
         sales_query = sales_query.filter(models.Sale.date >= start_date)
     if end_date:
         sales_query = sales_query.filter(models.Sale.date <= end_date)
-    sales = sales_query.options(
-        joinedload(models.Sale.sale_items).joinedload(models.SaleItem.product_type)
-    ).order_by(models.Sale.date).all()
+    sales = (
+        sales_query.options(
+            joinedload(models.Sale.sale_items).joinedload(models.SaleItem.product_type)
+        )
+        .order_by(models.Sale.date)
+        .all()
+    )
 
     # Get payments
     payments_query = db.query(models.Payment).filter(
@@ -171,14 +175,13 @@ def get_buyer_ledger(
     transactions = []
 
     for sale in sales:
-        # Get primary product details
+        # Build description from all sale items: "PLY 50kg, LAFA 30kg"
         if sale.sale_items:
-            # Taking the first item as representative or summarizing
-            item = sale.sale_ite    ms[0]
-            prod_name = item.product_type.name if item.product_type else "Unknown"
-            desc = f"{prod_name} - {item.quantity}{item.unit}"
-            if len(sale.sale_items) > 1:
-                desc += f" (+{len(sale.sale_items)-1} more)"
+            parts = []
+            for item in sale.sale_items:
+                prod_name = item.product_type.name if item.product_type else "Item"
+                parts.append(f"{prod_name} {item.quantity}{item.unit}")
+            desc = ", ".join(parts)
         else:
             desc = "Sale"
 
