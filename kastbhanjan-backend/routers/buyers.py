@@ -170,7 +170,6 @@ def get_buyer_ledger(
 
     for sale in sales:
         # Get primary product details
-        desc = f"Sale #{sale.id}"
         if sale.sale_items:
             # Taking the first item as representative or summarizing
             item = sale.sale_items[0]
@@ -178,6 +177,8 @@ def get_buyer_ledger(
             desc = f"{prod_name} - {item.quantity}{item.unit}"
             if len(sale.sale_items) > 1:
                 desc += f" (+{len(sale.sale_items)-1} more)"
+        else:
+            desc = "Sale"
 
         transactions.append(
             {
