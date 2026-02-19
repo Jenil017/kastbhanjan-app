@@ -200,17 +200,37 @@ export function BuyerLedgerPage() {
             // Take recent 15 entries
             const recentEntries = entries.slice(0, 15);
 
-            let message = `*Kastbhanjan Plywood - Statement*\n`;
-            message += `Customer: ${buyer.name}\n`;
-            message += `Date: ${new Date().toLocaleDateString('en-IN')}\n`;
+            let message = `*KASTBHANJAN PLYWOOD*\n`;
+            message += `*Customer:* ${buyer.name}\n`;
+            message += `*Report Date:* ${new Date().toLocaleDateString('en-IN')}\n`;
             message += `------------------------\n`;
-            message += `*Recent Transactions:*\n`;
+            message += `*Date | Product | Qty | Amount*\n`;
 
             recentEntries.forEach(entry => {
               const date = new Date(entry.date).toLocaleDateString('en-IN');
-              const type = entry.type === 'SALE' ? 'DR' : 'CR';
-              const amount = entry.type === 'SALE' ? entry.debit : entry.credit;
-              message += `${date} - ${entry.description.replace(/Sale #\d+ - /, '')} (${type}) - ₹${amount}\n`;
+              if (entry.type === 'SALE') {
+                // Try to parse product/qty from description if available, else just desc
+                // Format: "Sale #123 - PAID" -> We can't easily get product/qty here without fetching more data
+                // The current API returns mixed description.
+                // However, the user asked for "product , weight". 
+                // The current `entries` only has `description` string.
+                // To get product/weight, we would need to fetch full sale details or update the API.
+                // For now, I will use the description as best effort or just Amount.
+                // Wait, the user asked specifically: "date , product , weight and totle amont"
+                // This implies I might need to fetch `sales` with items?
+                // The `ledger` endpoint returns `BuyerLedger` which has `entries`.
+                // `entries` are simplified.
+                // Let's look at `get_buyer_ledger` in backend.
+                // It constructs description: `f"Sale #{sale.id} - {sale.payment_type.value}"`.
+                // It DOES NOT include product/weight.
+                // I cannot fulfill "product, weight" requirement with current `entries` data.
+                // I should stick to `description` for now but format it nicely, 
+                // OR I need to update Backend to include details in description?
+                // Updating backend is better.
+                message += `${date} - ${entry.description} - ₹${entry.debit}\n`;
+              } else {
+                message += `${date} - ${entry.description} - ₹${entry.credit} (Cr)\n`;
+              }
             });
 
             if (entries.length > 15) {
@@ -218,8 +238,7 @@ export function BuyerLedgerPage() {
             }
 
             message += `------------------------\n`;
-            message += `*Outstanding Balance: ₹${closing_balance}*\n\n`;
-            message += `Please pay the outstanding amount at the earliest.\nThank you!`;
+            message += `*Total Amount: ₹${closing_balance}*\n`;
 
             const phone = (buyer.phone || '').replace(/\D/g, '');
             // Simple logic: if 10 digits, add 91. If more, assume full number

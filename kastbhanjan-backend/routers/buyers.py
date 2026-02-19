@@ -169,11 +169,21 @@ def get_buyer_ledger(
     transactions = []
 
     for sale in sales:
+        # Get primary product details
+        desc = f"Sale #{sale.id}"
+        if sale.sale_items:
+            # Taking the first item as representative or summarizing
+            item = sale.sale_items[0]
+            prod_name = item.product_type.name if item.product_type else "Unknown"
+            desc = f"{prod_name} - {item.quantity}{item.unit}"
+            if len(sale.sale_items) > 1:
+                desc += f" (+{len(sale.sale_items)-1} more)"
+
         transactions.append(
             {
                 "date": sale.date,
                 "type": "SALE",
-                "description": f"Sale #{sale.id} - {sale.payment_type.value}",
+                "description": desc,
                 "debit": sale.total_amount,
                 "credit": 0,
                 "obj": sale,
