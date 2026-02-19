@@ -28,13 +28,12 @@ export function usePWA() {
     const [swRegistered, setSwRegistered] = useState(false);
     const [isInstalled, setIsInstalled] = useState(isAppInstalled());
 
-    // Register service worker
+    // Wait for service worker (already registered in index.html)
     useEffect(() => {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker
-                .register('/sw.js')
+            navigator.serviceWorker.ready
                 .then((reg) => {
-                    console.log('[PWA] SW registered:', reg.scope);
+                    console.log('[PWA] SW ready:', reg.scope);
                     setSwRegistered(true);
 
                     // Tell SW to schedule the nightly notification
@@ -50,7 +49,7 @@ export function usePWA() {
                         });
                     });
                 })
-                .catch((err) => console.error('[PWA] SW registration failed:', err));
+                .catch((err) => console.error('[PWA] SW ready failed:', err));
         }
     }, []);
 

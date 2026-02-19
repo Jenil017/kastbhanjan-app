@@ -1,24 +1,41 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kastbhanjan Plywood</title>
 
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#f59e0b" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Kastbhanjan" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kastbhanjan Plywood</title>
 
-    <!-- SEO -->
-    <meta name="description" content="Kastbhanjan Plywood - Business management for purchases, sales, expenses and customer ledger." />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#f59e0b" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Kastbhanjan" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+
+  <!-- SEO -->
+  <meta name="description"
+    content="Kastbhanjan Plywood - Business management for purchases, sales, expenses and customer ledger." />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+
+  <!-- Register Service Worker (must be in HTML for PWABuilder detection) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function (reg) {
+          console.log('[PWA] SW registered from index.html:', reg.scope);
+        })
+        .catch(function (err) {
+          console.error('[PWA] SW registration failed:', err);
+        });
+    }
+  </script>
+</body>
+
 </html>
