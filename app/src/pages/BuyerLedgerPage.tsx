@@ -24,7 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Phone, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Phone, MapPin, MessageCircle } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
 
@@ -185,10 +185,57 @@ export function BuyerLedgerPage() {
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200"
+          onClick={() => {
+            if (!ledger?.buyer.phone) {
+              toast.error("Customer phone number not available");
+              return;
+            }
+
+            const { buyer, entries, closing_balance } = ledger;
+
+            // Take recent 15 entries
+            const recentEntries = entries.slice(0, 15);
+
+            let message = `*Kastbhanjan Plywood - Statement*\n`;
+            message += `Customer: ${buyer.name}\n`;
+            message += `Date: ${new Date().toLocaleDateString('en-IN')}\n`;
+            message += `------------------------\n`;
+            message += `*Recent Transactions:*\n`;
+
+            recentEntries.forEach(entry => {
+              const date = new Date(entry.date).toLocaleDateString('en-IN');
+              const type = entry.type === 'SALE' ? 'DR' : 'CR';
+              const amount = entry.type === 'SALE' ? entry.debit : entry.credit;
+              message += `${date} - ${entry.description.replace(/Sale #\d+ - /, '')} (${type}) - ₹${amount}\n`;
+            });
+
+            if (entries.length > 15) {
+              message += `... (+${entries.length - 15} more)\n`;
+            }
+
+            message += `------------------------\n`;
+            message += `*Outstanding Balance: ₹${closing_balance}*\n\n`;
+            message += `Please pay the outstanding amount at the earliest.\nThank you!`;
+
+            const phone = (buyer.phone || '').replace(/\D/g, '');
+            // Simple logic: if 10 digits, add 91. If more, assume full number
+            const finalPhone = phone.length === 10 ? `91${phone}` : phone;
+
+            const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+          }}
+        >
+          <MessageCircle className="w-4 h-4 mr-2" />
+          WhatsApp Statement
+        </Button>
+
         <Button
           onClick={() => setShowPaymentDialog(true)}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-blue-600 hover:bg-blue-700"
         >
           <Plus className="w-4 h-4 mr-2" />
           Record Payment
