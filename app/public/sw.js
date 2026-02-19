@@ -1,5 +1,5 @@
-const CACHE_NAME = 'kastbhanjan-v1';
-const ASSETS = ['/', '/index.html'];
+const CACHE_NAME = 'kastbhanjan-v2';
+const ASSETS = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 // Install: cache core assets
 self.addEventListener('install', (event) => {
@@ -9,7 +9,7 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: clean old caches + start notification scheduler
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) =>
@@ -17,6 +17,8 @@ self.addEventListener('activate', (event) => {
         )
     );
     self.clients.claim();
+    // Auto-start nightly notification scheduling
+    scheduleNightlyNotification();
 });
 
 // Fetch: network first, fallback to cache
@@ -33,8 +35,33 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
-// ── Notification Scheduling ──────────────────────────────
-// Listen for messages from the app
+// ── Push Notification Handler ────────────────────────────
+// When server sends a push, show the notification
+self.addEventListener('push', (event) => {
+    const data = event.data ? event.data.json() : {
+        title: '📋 Kastbhanjan - Daily Reminder',
+        body: 'Please add today\'s entries!'
+    };
+    const options = {
+        body: data.body,
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        vibrate: [200, 100, 200, 100, 200],
+        requireInteraction: true,
+        tag: data.tag || 'daily-reminder',
+        actions: [
+            { action: 'open', title: '📂 Open App' },
+            { action: 'dismiss', title: '✓ Done' }
+        ],
+        data: { url: data.url || '/' }
+    };
+    event.waitUntil(self.registration.showNotification(data.title, options));
+});
+
+// ── Client-side Notification Scheduling (fallback) ───────
+// This is a fallback for when server-side push isn't set up.
+// Note: setTimeout in SW is unreliable (browser may kill SW),
+// but works as a best-effort approach for now.
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
         scheduleNightlyNotification();
@@ -42,12 +69,10 @@ self.addEventListener('message', (event) => {
 });
 
 function scheduleNightlyNotification() {
-    // Calculate ms until next 10:00 PM
     const now = new Date();
     const next10pm = new Date();
     next10pm.setHours(22, 0, 0, 0);
 
-    // If already past 10pm today, schedule for tomorrow
     if (now >= next10pm) {
         next10pm.setDate(next10pm.getDate() + 1);
     }
@@ -91,9 +116,4 @@ self.addEventListener('notificationclick', (event) => {
             return clients.openWindow('/');
         })
     );
-});
-
-// Auto-start scheduling when SW activates
-self.addEventListener('activate', () => {
-    scheduleNightlyNotification();
 });
