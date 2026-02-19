@@ -416,6 +416,6 @@ export function BuyerLedgerPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }
