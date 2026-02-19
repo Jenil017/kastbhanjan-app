@@ -5,9 +5,9 @@
         ],
         "target": {
             "namespace": "android_app",
-            "package_name": "YOUR_PACKAGE_NAME_FROM_PWABUILDER",
+            "package_name": "app.vercel.kastbhanjan.twa",
             "sha256_cert_fingerprints": [
-                "YOUR_SHA256_FINGERPRINT_FROM_PWABUILDER"
+                "F1:F6:57:47:41:86:7C:A5:2D:92:84:6E:B0:A3:11:F7:FD:DC:11:B1:16:FD:7B:FD:A1:3C:1F:A2:AA:4D:1B:0A"
             ]
         }
     }
