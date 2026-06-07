@@ -134,6 +134,11 @@ The application is optimized for mobile use with:
 - Responsive tables
 - Mobile-optimized forms
 
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | Backend API URL | `http://localhost:8000/api` |
 
 ## License
 

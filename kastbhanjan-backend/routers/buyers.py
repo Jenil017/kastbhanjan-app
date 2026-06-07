@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import Optional, List
 from datetime import date
@@ -149,7 +149,13 @@ def get_buyer_ledger(
         sales_query = sales_query.filter(models.Sale.date >= start_date)
     if end_date:
         sales_query = sales_query.filter(models.Sale.date <= end_date)
-    sales = sales_query.order_by(models.Sale.date).all()
+    sales = (
+        sales_query.options(
+            joinedload(models.Sale.sale_items).joinedload(models.SaleItem.product_type)
+        )
+        .order_by(models.Sale.date)
+        .all()
+    )
 
     # Get payments
     payments_query = db.query(models.Payment).filter(
@@ -169,11 +175,21 @@ def get_buyer_ledger(
     transactions = []
 
     for sale in sales:
+        # Build description from all sale items: "PLY 50kg, LAFA 30kg"
+        if sale.sale_items:
+            parts = []
+            for item in sale.sale_items:
+                prod_name = item.product_type.name if item.product_type else "Item"
+                parts.append(f"{prod_name} {item.quantity}{item.unit}")
+            desc = ", ".join(parts)
+        else:
+            desc = "Sale"
+
         transactions.append(
             {
                 "date": sale.date,
                 "type": "SALE",
-                "description": f"Sale #{sale.id} - {sale.payment_type.value}",
+                "description": desc,
                 "debit": sale.total_amount,
                 "credit": 0,
                 "obj": sale,

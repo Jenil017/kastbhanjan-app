@@ -24,7 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Phone, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Phone, MapPin, MessageCircle } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
 
@@ -185,10 +185,69 @@ export function BuyerLedgerPage() {
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200"
+          onClick={() => {
+            if (!ledger?.buyer.phone) {
+              toast.error("Customer phone number not available");
+              return;
+            }
+
+            // Filter entries to current month
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const monthName = now.toLocaleString('en-IN', { month: 'long' });
+
+            const monthEntries = entries.filter(entry => {
+              const d = new Date(entry.date);
+              return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            });
+
+            // Sort oldest to newest for the message
+            const sortedEntries = [...monthEntries].reverse();
+
+            let message = `*KASTBHANJAN PLYWOOD*\n`;
+            message += `*Customer:* ${buyer.name}\n`;
+            message += `*Report:* ${monthName} ${currentYear}\n`;
+            message += `------------------------\n`;
+
+            let grandTotal = 0;
+
+            sortedEntries.forEach(entry => {
+              const date = new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit' });
+              if (entry.type === 'SALE') {
+                message += `${date} | ${entry.description} | ₹${entry.debit}\n`;
+                grandTotal += entry.debit;
+              } else {
+                message += `${date} | Payment (${entry.description.replace('Payment - ', '')}) | -₹${entry.credit}\n`;
+                grandTotal -= entry.credit;
+              }
+            });
+
+            if (sortedEntries.length === 0) {
+              message += `(No transactions this month)\n`;
+            }
+
+            message += `------------------------\n`;
+            message += `*Total: ₹${grandTotal.toFixed(0)}*\n`;
+
+            const phone = (buyer.phone || '').replace(/\D/g, '');
+            const finalPhone = phone.length === 10 ? `91${phone}` : phone;
+
+            const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+          }}
+        >
+          <MessageCircle className="w-4 h-4 mr-2" />
+          WhatsApp Statement
+        </Button>
+
         <Button
           onClick={() => setShowPaymentDialog(true)}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-blue-600 hover:bg-blue-700"
         >
           <Plus className="w-4 h-4 mr-2" />
           Record Payment
@@ -350,6 +409,6 @@ export function BuyerLedgerPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }
