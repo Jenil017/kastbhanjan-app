@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
 import os
 from dotenv import load_dotenv
 
@@ -18,17 +17,27 @@ if DATABASE_URL.startswith("postgres://"):
 elif DATABASE_URL.startswith("postgresql://") and "+psycopg" not in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
-# Serverless-friendly engine (Vercel functions are short-lived and many
-# instances can run concurrently):
-#  - NullPool: do not hold connections between invocations. Each ephemeral
-#    function instance opens and closes its own connection, and Neon's
-#    connection pooler (use the "-pooler" host in DATABASE_URL) manages the
-#    real pool so Postgres connections are not exhausted.
-#  - pool_pre_ping: discard dead/stale connections instead of erroring.
+# Serverless-friendly engine for Vercel functions.
+#
+# A Vercel function instance stays "warm" between requests and the module-level
+# engine below is reused, so we keep a SMALL connection pool instead of NullPool.
+# This lets a warm instance reuse its Postgres connection across requests rather
+# than paying the (expensive, especially cross-region) TLS + auth handshake on
+# every single request -- which is what made every DB-backed endpoint take ~2.5s.
+#
+#  - pool_size=1 / max_overflow=2: tiny footprint per instance (functions handle
+#    one request at a time), so concurrent instances won't exhaust Neon.
+#  - pool_recycle=300: drop connections before Neon's idle timeout / suspend.
+#  - pool_pre_ping: replace a dead connection instead of erroring on reuse.
+#  - prepare_threshold=None: disable psycopg3 server-side prepared statements so
+#    this works whether DATABASE_URL is Neon's direct OR pooled (pgbouncer) host.
 engine = create_engine(
     DATABASE_URL,
-    poolclass=NullPool,
+    pool_size=1,
+    max_overflow=2,
+    pool_recycle=300,
     pool_pre_ping=True,
+    connect_args={"prepare_threshold": None},
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
