@@ -1,20 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine, Base
-from routers import auth, purchases, sales, buyers, expenses, product_types, analytics
-from seed_data import seed_all_data
-from sqlalchemy.orm import Session
-from database import SessionLocal
-
-# Create database tables
-Base.metadata.create_all(bind=engine)
-
-# Seed initial data
-db = SessionLocal()
-try:
-    seed_all_data(db)
-finally:
-    db.close()
+from routers import (
+    auth,
+    purchases,
+    sales,
+    buyers,
+    expenses,
+    product_types,
+    analytics,
+)
 
 app = FastAPI(
     title="Kastbhanjan Playwood Management System",
@@ -22,11 +16,16 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS middleware
+# CORS
+# In production the API is served same-origin under /api on Vercel, so CORS is
+# not strictly required there. It is kept for local development (Vite dev server
+# on :5173 calling the API on :8000). Auth is a Bearer token in the
+# Authorization header (not cookies), so we use a wildcard origin WITHOUT
+# credentials, which is a valid CORS combination (wildcard + credentials is not).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend domain
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

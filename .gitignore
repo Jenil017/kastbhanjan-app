@@ -2,4 +2,10 @@ node_modules
 dist
 .env
 *.local
-node_modules
+
+# Python venv / caches
+myenv/
+.venv/
+venv/
+__pycache__/
+*.pyc

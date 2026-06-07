@@ -12,4 +12,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Dev-only: proxy /api to the local FastAPI server so the frontend uses the
+  // same relative "/api" base URL in development as it does in production
+  // (where Vercel serves the API same-origin under /api). Run the backend with:
+  //   cd server && uvicorn main:app --reload --port 8000
+  server: {
+    proxy: {
+      "/api": "http://localhost:8000",
+    },
+  },
 });

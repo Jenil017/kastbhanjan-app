@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 import os
 from dotenv import load_dotenv
 
@@ -17,7 +18,18 @@ if DATABASE_URL.startswith("postgres://"):
 elif DATABASE_URL.startswith("postgresql://") and "+psycopg" not in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
-engine = create_engine(DATABASE_URL)
+# Serverless-friendly engine (Vercel functions are short-lived and many
+# instances can run concurrently):
+#  - NullPool: do not hold connections between invocations. Each ephemeral
+#    function instance opens and closes its own connection, and Neon's
+#    connection pooler (use the "-pooler" host in DATABASE_URL) manages the
+#    real pool so Postgres connections are not exhausted.
+#  - pool_pre_ping: discard dead/stale connections instead of erroring.
+engine = create_engine(
+    DATABASE_URL,
+    poolclass=NullPool,
+    pool_pre_ping=True,
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
