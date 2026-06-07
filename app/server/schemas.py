@@ -3,6 +3,12 @@ from typing import Optional, List, Union
 from datetime import date, datetime
 from enum import Enum
 
+# Alias for the date type. Model fields literally named ``date`` that also have a
+# default value would otherwise shadow the imported ``date`` type within the
+# class body (turning ``Optional[date]`` into ``Optional[None]``), so annotate
+# those fields with ``DateType`` instead.
+DateType = date
+
 
 # Enums
 class PaymentType(str, Enum):
@@ -133,7 +139,7 @@ class PurchaseCreate(PurchaseBase):
 
 
 class PurchaseUpdate(BaseModel):
-    date: Optional[Union[date, str]] = None
+    date: Optional[Union[DateType, str]] = None
     seller_name: Optional[str] = None
     seller_phone: Optional[str] = None
     pickup_location: Optional[str] = None
@@ -192,7 +198,7 @@ class SaleCreate(SaleBase):
 
 
 class SaleUpdate(BaseModel):
-    date: Optional[Union[date, str]] = None
+    date: Optional[Union[DateType, str]] = None
     buyer_id: Optional[int] = None
     payment_type: Optional[PaymentType] = None
     payment_received_now: Optional[float] = None
@@ -255,7 +261,7 @@ class ExpenseCreate(ExpenseBase):
 
 
 class ExpenseUpdate(BaseModel):
-    date: Optional[date] = None
+    date: Optional[DateType] = None
     category: Optional[ExpenseCategory] = None
     amount: Optional[float] = None
     description: Optional[str] = None
