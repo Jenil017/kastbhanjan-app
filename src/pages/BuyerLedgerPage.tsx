@@ -195,34 +195,46 @@ export function BuyerLedgerPage() {
               return;
             }
 
-            const { buyer, entries, closing_balance } = ledger;
+            // Filter entries to current month
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const monthName = now.toLocaleString('en-IN', { month: 'long' });
 
-            // Take recent 15 entries
-            const recentEntries = entries.slice(0, 15);
-
-            let message = `*Kastbhanjan Plywood - Statement*\n`;
-            message += `Customer: ${buyer.name}\n`;
-            message += `Date: ${new Date().toLocaleDateString('en-IN')}\n`;
-            message += `------------------------\n`;
-            message += `*Recent Transactions:*\n`;
-
-            recentEntries.forEach(entry => {
-              const date = new Date(entry.date).toLocaleDateString('en-IN');
-              const type = entry.type === 'SALE' ? 'DR' : 'CR';
-              const amount = entry.type === 'SALE' ? entry.debit : entry.credit;
-              message += `${date} - ${entry.description.replace(/Sale #\d+ - /, '')} (${type}) - ₹${amount}\n`;
+            const monthEntries = entries.filter(entry => {
+              const d = new Date(entry.date);
+              return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
             });
 
-            if (entries.length > 15) {
-              message += `... (+${entries.length - 15} more)\n`;
+            // Sort oldest to newest for the message
+            const sortedEntries = [...monthEntries].reverse();
+
+            let message = `*KASTBHANJAN PLYWOOD*\n`;
+            message += `*Customer:* ${buyer.name}\n`;
+            message += `*Report:* ${monthName} ${currentYear}\n`;
+            message += `------------------------\n`;
+
+            let grandTotal = 0;
+
+            sortedEntries.forEach(entry => {
+              const date = new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit' });
+              if (entry.type === 'SALE') {
+                message += `${date} | ${entry.description} | ₹${entry.debit}\n`;
+                grandTotal += entry.debit;
+              } else {
+                message += `${date} | Payment (${entry.description.replace('Payment - ', '')}) | -₹${entry.credit}\n`;
+                grandTotal -= entry.credit;
+              }
+            });
+
+            if (sortedEntries.length === 0) {
+              message += `(No transactions this month)\n`;
             }
 
             message += `------------------------\n`;
-            message += `*Outstanding Balance: ₹${closing_balance}*\n\n`;
-            message += `Please pay the outstanding amount at the earliest.\nThank you!`;
+            message += `*Total: ₹${grandTotal.toFixed(0)}*\n`;
 
             const phone = (buyer.phone || '').replace(/\D/g, '');
-            // Simple logic: if 10 digits, add 91. If more, assume full number
             const finalPhone = phone.length === 10 ? `91${phone}` : phone;
 
             const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`;
@@ -397,6 +409,6 @@ export function BuyerLedgerPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }
