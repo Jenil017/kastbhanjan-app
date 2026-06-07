@@ -62,11 +62,16 @@ npm install
 
 ### 2. Configure API URL
 
-Update `.env` file with your backend API URL:
+The frontend and the FastAPI backend are deployed together on Vercel and served
+same-origin, so in production the API base URL is just `/api`:
 
 ```env
-VITE_API_URL=http://localhost:8000/api
+VITE_API_URL=/api
 ```
+
+For local development the Vite dev server proxies `/api` to the local backend on
+port 8000 (see `vite.config.ts`), so `/api` works locally too as long as the
+backend is running. See `DEPLOY_VERCEL.md` for the full deployment guide.
 
 ### 3. Run Development Server
 
@@ -138,7 +143,7 @@ The application is optimized for mobile use with:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_API_URL` | Backend API URL | `http://localhost:8000/api` |
+| `VITE_API_URL` | Backend API URL (same-origin on Vercel) | `/api` |
 
 ## License
 
