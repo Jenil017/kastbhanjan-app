@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="#0f172a"/>
+  
+  <!-- Wood plank layers (plywood) -->
+  <rect x="80" y="180" width="352" height="40" rx="8" fill="#92400e"/>
+  <rect x="80" y="230" width="352" height="40" rx="8" fill="#b45309"/>
+  <rect x="80" y="280" width="352" height="40" rx="8" fill="#92400e"/>
+  
+  <!-- Wood grain lines on middle plank -->
+  <line x1="120" y1="245" x2="200" y2="255" stroke="#78350f" stroke-width="2" opacity="0.5"/>
+  <line x1="220" y1="240" x2="320" y2="252" stroke="#78350f" stroke-width="2" opacity="0.5"/>
+  <line x1="340" y1="243" x2="400" y2="250" stroke="#78350f" stroke-width="2" opacity="0.5"/>
+
+  <!-- Golden accent bar on top -->
+  <rect x="80" y="160" width="352" height="12" rx="4" fill="#f59e0b"/>
+  
+  <!-- K letter -->
+  <text x="256" y="155" font-family="Arial Black, sans-serif" font-size="80" font-weight="900" 
+        text-anchor="middle" fill="#f59e0b" opacity="0.15">K</text>
+
+  <!-- Bottom label area -->
+  <rect x="80" y="340" width="352" height="32" rx="6" fill="#1e293b"/>
+  <text x="256" y="362" font-family="Arial, sans-serif" font-size="18" font-weight="bold"
+        text-anchor="middle" fill="#f59e0b" letter-spacing="2">KASTBHANJAN</text>
+</svg>
